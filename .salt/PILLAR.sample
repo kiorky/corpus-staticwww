@@ -16,8 +16,18 @@
 # but lists are overidden
 makina-projects.projectname:
   data:
-    opt: value
-    password: SecretToBeChangedInsidePillar
+    doc_root: "{data_root}/www"
+    index: "{doc_root}/index.html"
+    htaccess: "/etc/{name}.webaccess"
+    domain: "{fqdn}"
+    server_aliases: []
+    nginx_upstreams: salt://makina-projects/{name}/files/nginx.upstreams.conf
+    nginx_vhost: salt://makina-projects/{name}/files/nginx.content.conf
+    #force_ssl: false
+    #disabled_urls []
+    #ldap_url: "ldap://ldap.net/dc=m,dc=com?uid?sub?(objectClass=person)"
+    #admin_url: /admin
+    #admin_allowed_ips :[]
   env_defaults:
     dev:
       opt: value2

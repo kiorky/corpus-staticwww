@@ -1,29 +1,5 @@
 {% set cfg = opts.ms_project %}
 {% set data = cfg.data %}
-{% set scfg = salt['mc_utils.json_dump'](cfg) %}
-{{cfg.name}}-htaccess:
-  file.managed:
-    - name: {{data.htaccess}}
-    - source: ''
-    - user: www-data
-    - group: www-data
-    - mode: 770
-
-{% if data.get('http_users', {}) %}
-{% for userrow in data.http_users %}
-{% for user, passwd in userrow.items() %}
-{{cfg.name}}-{{user}}-htaccess:
-  webutil.user_exists:
-    - name: {{user}}
-    - password: {{passwd}}
-    - htpasswd_file: {{data.htaccess}}
-    - options: m
-    - force: true
-    - watch:
-      - file: {{cfg.name}}-htaccess
-{% endfor %}
-{% endfor %}
-{% endif %}
 
 {{cfg.name}}-www-data:
   user.present:
@@ -31,6 +7,7 @@
     - optional_groups:
       - {{cfg.group}}
     - remove_groups: false
+    - system: true
 
 prepreqs-{{cfg.name}}:
   pkg.installed:
@@ -39,6 +16,7 @@ prepreqs-{{cfg.name}}:
     - pkgs:
       - apache2-utils
       - libgeoip-dev
+      - rsync
 
 {{cfg.name}}-dirs:
   file.directory:
@@ -51,13 +29,17 @@ prepreqs-{{cfg.name}}:
     - names:
       - {{data.doc_root}}
 
-
 {{cfg.name}}-index:
-  cmd.run:
-    - unless: test -e "{{data.index}}"
-    - name: echo "<html><body>It works</body></html>">"{{data.index}}"
-    - user: {{cfg.user}}
+  file.managed:
+    - name: "{{data.index}}"
+    - user: www-data
     - group: {{cfg.group}}
+    - makedirs: true
+    - contents: "<html><body>It works</body></html"
+    - unless: |
+              set -x
+              if test -e "{{data.index}}";then exit 0;fi
+              {{data.docroot_origin_test}}
     - watch:
       - pkg: prepreqs-{{cfg.name}}
       - user: {{cfg.name}}-www-data

@@ -16,6 +16,21 @@
 # but lists are overidden
 makina-projects.projectname:
   data:
+    docroot_origin: "{project_root}"
+    docroot_origin_test: "test -e {project_root}/index.html"
+    extra_rsync_opts: ""
+    #activate for destructive rsync
+    #extra_rsync_opts: "--delete --delete-excluded"
+    docroot_origin_rsync_opts: >-
+     -aAzv
+     --exclude=.salt
+     --exclude='doc*'
+     --exclude='README*'
+     --exclude='readme*'
+     --exclude='.git*'
+     --exclude=.svn
+     --exclude=.bzr
+     {extra_rsync_opts}
     doc_root: "{data_root}/www"
     index: "{doc_root}/index.html"
     htaccess: "/etc/{name}.webaccess"
@@ -28,14 +43,4 @@ makina-projects.projectname:
     #ldap_url: "ldap://ldap.net/dc=m,dc=com?uid?sub?(objectClass=person)"
     #admin_url: /admin
     #admin_allowed_ips :[]
-  env_defaults:
-    dev:
-      opt: value2
-  os_defaults:
-    Ubuntu:
-# os  filter
-      opt: value1
-    Debian:
-# os familly filter
-      opt1: value11
 # vim:set ft=yaml:
